@@ -2,7 +2,7 @@ import pandas as pd
 
 def run():
     # Load the dataset
-    df = pd.read_csv("NLP_FISAC/Backend/Reddit/reddit_posts.csv")
+    df = pd.read_csv("/home/captain/Desktop/NLP_FISAC/Backend/Reddit/reddit_posts.csv")
 
     # 🔹 Convert 'Date' column to datetime format
     df['Date'] = pd.to_datetime(df['Date'])
@@ -22,6 +22,6 @@ def run():
     print("\nNumber of Unique Dates:", df['Post_Date'].nunique())
 
     # 🔹 Save cleaned data
-    df.to_csv("NLP_FISAC/Backend/Sentiment_Analysis/reddit_posts_cleaned.csv", index=False)
+    df.to_csv("/home/captain/Desktop/NLP_FISAC/Backend/Sentiment_Analysis/reddit_posts_cleaned.csv", index=False)
 
     print("\nPreprocessing complete. Cleaned data saved as 'reddit_posts_cleaned.csv'.")

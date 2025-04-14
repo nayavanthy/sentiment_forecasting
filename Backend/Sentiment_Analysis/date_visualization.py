@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Load the dataset
-df = pd.read_csv("NLP_FISAC/Backend/Sentiment_Analysis/reddit_posts_cleaned.csv")
+df = pd.read_csv("/home/captain/Desktop/NLP_FISAC/Backend/Sentiment_Analysis/reddit_posts_cleaned.csv")
 
 # Convert 'Post_Date' to datetime format
 df['Post_Date'] = pd.to_datetime(df['Post_Date'])

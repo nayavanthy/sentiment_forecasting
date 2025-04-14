@@ -7,10 +7,6 @@ import os
 def run():
     dir = '/home/captain/Desktop/NLP_FISAC/Backend/Reddit'
 
-    REDDIT_CLIENT_ID = ""
-    REDDIT_CLIENT_SECRET = ""
-    REDDIT_USER_AGENT = "linux:SentimentForecast:v1.0 (by u/nayavanth_acad)"
-
     # 🔹 Setup Reddit API credentials
     reddit = praw.Reddit(
         client_id=REDDIT_CLIENT_ID,
@@ -19,27 +15,28 @@ def run():
     )
 
     # 🔹 Load keywords from keywords.txt
-    with open("NLP_FISAC/Backend/Hashtag_Generation/keywords.txt", "r") as file:
+    with open("/home/captain/Desktop/NLP_FISAC/Backend/Hashtag_Generation/keywords.txt", "r") as file:
         keywords = [re.sub(r"^\d+\.\s*", "", line.strip()) for line in file.readlines()]
 
     # 🔹 Storage for results
     all_posts = []
 
     # 🔹 Fetch posts for each keyword
-    for keyword in keywords:
-        print(f"🔍 Fetching posts for '{keyword}'...")
+    for count, keyword in enumerate(keywords):
+        if count < 5:
+            print(f"🔍 Fetching posts for '{keyword}'...")
 
-        try:
-            for post in reddit.subreddit("all").search(keyword, time_filter="all", limit=1000):
-                all_posts.append([
-                    time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(post.created_utc)),  # Convert timestamp
-                    post.title,
-                    post.selftext,
-                    post.subreddit.display_name
-                ])
-            
-        except Exception as e:
-            print(f"⚠️ Error fetching data for '{keyword}': {e}")
+            try:
+                for post in reddit.subreddit("all").search(keyword, time_filter="all", limit=1000):
+                    all_posts.append([
+                        time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(post.created_utc)),  # Convert timestamp
+                        post.title,
+                        post.selftext,
+                        post.subreddit.display_name
+                    ])
+                
+            except Exception as e:
+                print(f"⚠️ Error fetching data for '{keyword}': {e}")
 
     # 🔹 Save to CSV
     df = pd.DataFrame(all_posts, columns=["Date", "Title", "Content", "Subreddit"])

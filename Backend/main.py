@@ -42,8 +42,8 @@ async def process_action(request: ActionRequest):
     # Run each script exactly as written, in sequence
     try:
         generator.run(topic)  # Runs hashtag generation
-        #scrape_reddit.run()  # Runs Reddit scraping
-        #sentiment_analysis.run()  # Runs sentiment analysis
+        scrape_reddit.run()  # Runs Reddit scraping
+        sentiment_analysis.run()  # Runs sentiment analysis
         arima.run()  # Runs ARIMA forecast
     except Exception as e:
         return JSONResponse(content={"status": "failed", "error": str(e)}, status_code=500)

@@ -1,52 +1,42 @@
 import pandas as pd
-import openai
+import requests
 import time
 from tqdm import tqdm
-import re
 
+#import data_preprocessing
+#import cloud_run
 from Sentiment_Analysis import data_preprocessing
+from Sentiment_Analysis import cloud_run
 
-# OpenAI API Key (Replace with your key)
-OPENAI_API_KEY = ""
-
-# Function to get sentiment from OpenAI
 def get_sentiment(titles):
-    prompt = "Classify the following Reddit post titles into 'Positive', 'Neutral', or 'Negative':\n\n"
-    prompt += "\n".join([f"{i+1}. {title}" for i, title in enumerate(titles)])
-    chat_client = openai.OpenAI(api_key=OPENAI_API_KEY)
+    payload = [
+            {'texts': titles}
+        ]
 
-    response = chat_client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "system", "content": "You are a sentiment analysis model."},
-                  {"role": "user", "content": prompt}],
-        temperature=0
-    )
-    
-    # Extract sentiment labels
-    sentiments = response.choices[0].message.content.strip().split("\n")  # Split into a list of lines
-    sentiments = [re.sub(r"^\d+\.\s*", "", line) for line in sentiments]
-
-    return sentiments
+    try:
+        response = cloud_run.predict_custom_trained_model_sample(project = "bert-vertex-ai", endpoint_id= "3877006642398625792", instances=payload)
+        return response
+    except Exception as e:
+        print(f"Error during prediction: {e}")
+        return ["Error"] * len(titles)
 
 def run():
-
     data_preprocessing.run()
 
     # Load dataset
-    df = pd.read_csv("NLP_FISAC/Backend/Sentiment_Analysis/reddit_posts_cleaned.csv")
+    df = pd.read_csv("/home/captain/Desktop/NLP_FISAC/Backend/Sentiment_Analysis/reddit_posts_cleaned.csv")
 
     # Ensure 'Post_Date' is in datetime format
     df['Post_Date'] = pd.to_datetime(df['Post_Date'])
 
-    # Process in batches
-    batch_size = 100
+    batch_size = 200
     sentiment_results = []
 
     for i in tqdm(range(0, len(df), batch_size)):
-        batch_df = df.iloc[i:i+batch_size]  # Select valid batch
+        batch_df = df.iloc[i:i+batch_size]
         batch_titles = batch_df['Title'].tolist()
 
-        if not batch_titles:  # Skip empty batch
+        if not batch_titles:
             continue
         
         try:
@@ -55,15 +45,14 @@ def run():
                 sentiment_results.append([df.iloc[i+j]['Post_Date'], df.iloc[i+j]['Title'], sentiment])
         except Exception as e:
             print(f"Error in batch {i//batch_size + 1}: {e}")
-            time.sleep(5)  # Wait before retrying
+            time.sleep(5)
 
-    # Convert results to DataFrame
     sentiment_df = pd.DataFrame(sentiment_results, columns=['Date', 'Title', 'Sentiment'])
-
-    # Save to CSV
-    sentiment_df.to_csv("NLP_FISAC/Backend/Sentiment_Analysis/sentiment.csv", index=False)
+    sentiment_df.to_csv("/home/captain/Desktop/NLP_FISAC/Backend/Sentiment_Analysis/sentiment.csv", index=False)
 
     print("Sentiment analysis completed and saved to sentiment.csv")
 
 if __name__ == '__main__':
     run()
+
+    #print(get_sentiment(["i love this", 'i hate this']))
